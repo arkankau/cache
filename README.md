@@ -1,6 +1,8 @@
 # Cache
 
-Cache is a deterministic finance-ops demo for Northwind Software. It shows a frontier model solving a novel ledger case once, compiling that trace into a validated cheap specialist, and routing repeats through the specialist while resolving policy codes live from the source-of-truth lake.
+Cache is a deterministic finance-ops demo for Northwind Software. It shows a frontier model solving novel ledger cases once, compiling each trace into a validated cheap specialist, and routing repeats through the specialist while resolving policy codes live from the source-of-truth lake.
+
+The live sequence runs for about 33 seconds and distills three case types. Lake context files can be dragged onto a selected specialist or dropped into the detach tray; active references pulse when they are resolved.
 
 The demo defaults to `MOCK_MODE=True` and makes no model network calls.
 

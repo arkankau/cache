@@ -22,6 +22,12 @@ class LakeEdit(BaseModel):
     rate: float = 0.08
 
 
+class ContextEdit(BaseModel):
+    specialist_id: str
+    code: str
+    action: str
+
+
 @app.get("/health")
 async def health():
     return {"ok": True}
@@ -48,3 +54,9 @@ async def reset_demo():
 async def edit_lake(edit: LakeEdit):
     row = engine.edit_lake_rate(edit.code, edit.rate)
     return {"code": edit.code, "row": row, "state": engine.state()}
+
+
+@app.post("/library/context")
+async def edit_specialist_context(edit: ContextEdit):
+    specialist = engine.update_specialist_context(edit.specialist_id, edit.code, edit.action)
+    return {"specialist": specialist, "state": engine.state()}

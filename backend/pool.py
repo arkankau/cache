@@ -80,6 +80,30 @@ ENTRY_POOL = {
         "_case_signature": "expense|P-22",
         "_ground_truth": {"gl_code": "GL-6200", "state_code": "ST-TX-03", "disposition": "1099-reportable"},
     },
+    "E-RUSH": {
+        "entry_id": "E-RUSH", "type": "expense", "vendor_id": "VEND-0090", "amount": 8750.00,
+        "raw_text": "Beacon Contractors same-day release requested for production recovery work.", "arrival_t": 12,
+        "_case_signature": "expense|P-22-RUSH",
+        "_ground_truth": {"gl_code": "GL-6200", "state_code": "ST-TX-03", "disposition": "expedite-review"},
+    },
+    "E-RUSH-REPEAT": {
+        "entry_id": "E-RUSH-REPEAT", "type": "expense", "vendor_id": "VEND-0090", "amount": 4100.00,
+        "raw_text": "Urgent release for Beacon Contractors; expedite payment today.", "arrival_t": 17,
+        "_case_signature": "expense|P-22-RUSH",
+        "_ground_truth": {"gl_code": "GL-6200", "state_code": "ST-TX-03", "disposition": "expedite-review"},
+    },
+    "E-RETAINER": {
+        "entry_id": "E-RETAINER", "type": "invoice", "vendor_id": "VEND-0102", "amount": 15000.00,
+        "raw_text": "Ironside Legal quarterly retainer paid in advance for regulatory counsel.", "arrival_t": 21,
+        "_case_signature": "invoice|P-30-RETAINER",
+        "_ground_truth": {"gl_code": "GL-6410", "state_code": "ST-NY-01", "disposition": "retainer-review"},
+    },
+    "E-RETAINER-REPEAT": {
+        "entry_id": "E-RETAINER-REPEAT", "type": "invoice", "vendor_id": "VEND-0102", "amount": 7500.00,
+        "raw_text": "Prepaid legal retainer for the upcoming contract cycle.", "arrival_t": 27,
+        "_case_signature": "invoice|P-30-RETAINER",
+        "_ground_truth": {"gl_code": "GL-6410", "state_code": "ST-NY-01", "disposition": "retainer-review"},
+    },
 }
 
 
@@ -110,24 +134,65 @@ HELD_OUT = {
             "_case_signature": "invoice|P-04-CAPEX",
             "_ground_truth": {"gl_code": "GL-4890", "state_code": "ST-NY-01", "disposition": "capitalize"},
         },
-    ]
+    ],
+    "expense|P-22-RUSH": [
+        {
+            "entry_id": f"E-RH0{index}", "type": "expense", "vendor_id": "VEND-0090",
+            "amount": 3000.00 + index * 425,
+            "raw_text": text, "arrival_t": None,
+            "_case_signature": "expense|P-22-RUSH",
+            "_ground_truth": {"gl_code": "GL-6200", "state_code": "ST-TX-03", "disposition": "expedite-review"},
+        }
+        for index, text in enumerate(
+            (
+                "Same-day contractor payment after outage recovery.",
+                "Rush release for implementation support.",
+                "Expedite contractor milestone today.",
+                "Urgent release for production remediation.",
+                "Same-day Beacon services settlement.",
+            ),
+            start=1,
+        )
+    ],
+    "invoice|P-30-RETAINER": [
+        {
+            "entry_id": f"E-LH0{index}", "type": "invoice", "vendor_id": "VEND-0102",
+            "amount": 5000.00 + index * 1000,
+            "raw_text": text, "arrival_t": None,
+            "_case_signature": "invoice|P-30-RETAINER",
+            "_ground_truth": {"gl_code": "GL-6410", "state_code": "ST-NY-01", "disposition": "retainer-review"},
+        }
+        for index, text in enumerate(
+            (
+                "Quarterly legal retainer paid in advance.",
+                "Prepaid legal counsel retainer.",
+                "Advance legal services retainer for July.",
+                "Ironside annual retainer installment.",
+                "Prepaid legal advisory retainer.",
+            ),
+            start=1,
+        )
+    ],
 }
 
 
 ARRIVAL_SCHEDULE = [
-    {"t_seconds": 8, "entry_id": "E-R01"},
-    {"t_seconds": 15, "entry_id": "E-R02"},
-    {"t_seconds": 23, "entry_id": "E-R03"},
-    {"t_seconds": 32, "entry_id": "E-R04"},
-    {"t_seconds": 40, "entry_id": "E-HERO"},
-    {"t_seconds": 50, "entry_id": "E-R05"},
-    {"t_seconds": 56, "entry_id": "E-R06"},
-    {"t_seconds": 63, "entry_id": "E-R07"},
-    {"t_seconds": 70, "entry_id": "E-H03"},
-    {"t_seconds": 76, "entry_id": "E-R08"},
-    {"t_seconds": 83, "entry_id": "E-R09"},
-    {"t_seconds": 91, "entry_id": "E-R10"},
-    {"t_seconds": 98, "entry_id": "E-R11"},
+    {"t_seconds": 1.0, "entry_id": "E-R01"},
+    {"t_seconds": 2.5, "entry_id": "E-R02"},
+    {"t_seconds": 4.0, "entry_id": "E-HERO"},
+    {"t_seconds": 6.5, "entry_id": "E-R03"},
+    {"t_seconds": 8.5, "entry_id": "E-H03"},
+    {"t_seconds": 10.0, "entry_id": "E-R04"},
+    {"t_seconds": 12.0, "entry_id": "E-RUSH"},
+    {"t_seconds": 14.5, "entry_id": "E-R05"},
+    {"t_seconds": 17.0, "entry_id": "E-RUSH-REPEAT"},
+    {"t_seconds": 18.5, "entry_id": "E-R06"},
+    {"t_seconds": 21.0, "entry_id": "E-RETAINER"},
+    {"t_seconds": 23.5, "entry_id": "E-R08"},
+    {"t_seconds": 27.0, "entry_id": "E-RETAINER-REPEAT"},
+    {"t_seconds": 29.0, "entry_id": "E-R09"},
+    {"t_seconds": 31.0, "entry_id": "E-R10"},
+    {"t_seconds": 33.0, "entry_id": "E-R11"},
 ]
 
 

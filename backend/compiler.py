@@ -12,13 +12,16 @@ TOOL_TO_TABLE = {
 }
 
 
-def build_template(rule: str, answer_fields: list[str]) -> str:
+def build_template(rule: str, answer: dict[str, Any]) -> str:
+    answer_fields = list(answer)
     fields = ", ".join(answer_fields)
     return (
         "Classify this finance entry.\n"
         "Entry: {raw_text}\n"
         "Resolved codes: {resolved_codes}\n"
         f"Rule: {rule}\n"
+        f"Procedure contract: gl_code={answer['gl_code']}; disposition={answer['disposition']}.\n"
+        "Set state_code to the live entry vendor's home_state from Resolved codes.\n"
         f"Output JSON with fields: {fields}. No reasoning."
     )
 
@@ -57,7 +60,7 @@ def compile_specialist(trace: dict[str, Any], entry: dict[str, Any]) -> dict[str
     emit_call = next(call for call in tool_calls if call["tool"] == "emit_answer")
     answer = emit_call["args"]
     answer_schema = {field: type(value).__name__ for field, value in answer.items()}
-    prompt_template = build_template(trace["reasoning_summary"], list(answer))
+    prompt_template = build_template(trace["reasoning_summary"], answer)
     assert_no_resolved_numeric_values(prompt_template, codes)
 
     signature = entry["_case_signature"]

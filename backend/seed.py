@@ -62,6 +62,15 @@ ANSWER_SCHEMA = {"gl_code": "str", "state_code": "str", "disposition": "str"}
 
 
 def _seed_spec(signature, distilled_from, codes, tables):
+    contracts = {
+        "invoice|P-04": ("GL-4021", "auto-post"),
+        "invoice|P-11": ("GL-5510", "meals-review"),
+        "expense|P-22": ("GL-6200", "1099-reportable"),
+        "invoice|P-30": ("GL-6410", "auto-post"),
+        "notification|dupe": ("GL-4021", "duplicate-review"),
+        "recon|multistate": ("GL-4021", "split-review"),
+    }
+    gl_code, disposition = contracts[signature]
     return {
         "specialist_id": f"SPEC-{signature.replace('|', '-')}",
         "case_signature": signature,
@@ -72,6 +81,8 @@ def _seed_spec(signature, distilled_from, codes, tables):
             "Classify this finance entry.\nEntry: {raw_text}\n"
             "Resolved codes: {resolved_codes}\n"
             "Rule: apply the validated ledger procedure for this case type.\n"
+            f"Procedure contract: gl_code={gl_code}; disposition={disposition}.\n"
+            "Set state_code to the live entry vendor's home_state from Resolved codes.\n"
             "Output JSON with fields: gl_code, state_code, disposition. No reasoning."
         ),
         "answer_schema": deepcopy(ANSWER_SCHEMA),
@@ -139,6 +150,14 @@ SEED_USAGE = {
     "specialist": {"prompt_tokens": 110, "completion_tokens": 15},
 }
 
+SEED_SUBMISSIONS = {
+    "invoice|P-04": ("invoice", 249.00, "Monthly software subscription invoice"),
+    "invoice|P-11": ("receipt", 684.50, "Team travel and meals receipt"),
+    "expense|P-22": ("expense", 4200.00, "Contractor milestone request"),
+    "invoice|P-30": ("invoice", 2800.00, "Legal services invoice"),
+    "notification|dupe": ("alert", 249.00, "Possible duplicate invoice detected"),
+}
+
 
 def frozen_seed_receipts():
     receipts = []
@@ -148,10 +167,14 @@ def frozen_seed_receipts():
             vendor, signature = SEED_VENDOR_CYCLE[index % len(SEED_VENDOR_CYCLE)]
             usage = deepcopy(SEED_USAGE[route])
             model = MODELS["frontier" if route == "general" else "cheap"]
+            entry_type, amount, raw_text = SEED_SUBMISSIONS[signature]
             receipts.append(
                 {
                     "entry_id": f"SEED-{index + 1:03d}",
                     "vendor": vendor,
+                    "entry_type": entry_type,
+                    "amount": amount,
+                    "raw_text": raw_text,
                     "case_signature": signature,
                     "route": route,
                     "answer": {},

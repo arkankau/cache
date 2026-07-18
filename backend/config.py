@@ -27,7 +27,7 @@ OPENAI_KEY_MAIN = os.getenv("OPENAI_KEY_MAIN", "")
 OPENAI_KEY_GEN = os.getenv("OPENAI_KEY_GEN", "")
 MOCK_MODE = _env_bool("MOCK_MODE", True)
 
-MODEL_LATENCY_SECONDS = {"frontier": 1.2, "cheap": 0.2}
+MODEL_LATENCY_SECONDS = {"frontier": 0.65, "cheap": 0.12}
 MODEL_LATENCY_SCALE = float(os.getenv("MODEL_LATENCY_SCALE", "1"))
 DEMO_TIME_SCALE = float(os.getenv("DEMO_TIME_SCALE", "1"))
 
@@ -40,3 +40,6 @@ CAPEX_CUES = (
     "12-month prepaid",
     "12-mo term",
 )
+
+RUSH_CUES = ("same-day", "rush", "expedite", "urgent release")
+RETAINER_CUES = ("retainer", "prepaid legal", "advance legal")

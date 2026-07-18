@@ -25,12 +25,16 @@ async def verify() -> dict[str, bool]:
     live = {receipt["entry_id"]: receipt for receipt in final["receipts"]}
     hero = live["E-HERO"]
     repeat = live["E-H03"]
+    rush_repeat = live["E-RUSH-REPEAT"]
+    retainer_repeat = live["E-RETAINER-REPEAT"]
     capex_spec = engine.library["invoice|P-04-CAPEX"]
 
     assert hero["route"] == "general"
     assert capex_spec["validation"] == {"held_out_matches": 5, "held_out_total": 5}
-    assert final["library_count"] == 7
+    assert final["library_count"] == 9
     assert repeat["route"] == "specialist" and repeat["matches_truth"]
+    assert rush_repeat["route"] == "specialist" and rush_repeat["matches_truth"]
+    assert retainer_repeat["route"] == "specialist" and retainer_repeat["matches_truth"]
     assert final["cost_per_task"] < opening["cost_per_task"]
 
     await engine.reset()
@@ -61,7 +65,7 @@ async def verify() -> dict[str, bool]:
         "offline_mock": True,
         "routine_specialist": live["E-R01"]["route"] == "specialist",
         "hero_general": hero["route"] == "general",
-        "library_6_to_7": final["library_count"] == 7,
+        "library_6_to_9": final["library_count"] == 9,
         "validation_5_of_5": capex_spec["validation"]["held_out_matches"] == 5,
         "repeat_specialist_match": repeat["matches_truth"],
         "cost_per_task_descends": final["cost_per_task"] < opening["cost_per_task"],

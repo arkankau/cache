@@ -68,7 +68,10 @@ async def _real_call(
         messages=[
             {
                 "role": "system",
-                "content": "Return only a JSON object matching the requested finance schema.",
+                "content": (
+                    "Return only a JSON object matching the requested finance schema. "
+                    "Preserve every supplied code and enum string exactly; never abbreviate codes."
+                ),
             },
             {"role": "user", "content": prompt},
         ],

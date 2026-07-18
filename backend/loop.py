@@ -19,6 +19,10 @@ def derive_signature(entry: dict[str, Any]) -> str:
         pattern = "multistate"
     elif vendor["recon_pattern"] == "P-04" and any(cue in raw_text for cue in config.CAPEX_CUES):
         pattern = "P-04-CAPEX"
+    elif vendor["recon_pattern"] == "P-22" and any(cue in raw_text for cue in config.RUSH_CUES):
+        pattern = "P-22-RUSH"
+    elif vendor["recon_pattern"] == "P-30" and any(cue in raw_text for cue in config.RETAINER_CUES):
+        pattern = "P-30-RETAINER"
     else:
         pattern = vendor["recon_pattern"]
     return f"{entry['type']}|{pattern}"
@@ -48,6 +52,7 @@ class DemoEngine:
         self.emitted = 0
         self.queue_depth = 0
         self.active_distillation = None
+        self.recent_distillation = None
         self.no_compress = []
         self.library_version = 0
         self.drawer = None
@@ -132,6 +137,10 @@ class DemoEngine:
             "vendor": vendor["name"],
             "case_signature": signature,
             "route": "distilling",
+            "entry_type": entry["type"],
+            "amount": entry["amount"],
+            "raw_text": entry["raw_text"],
+            "context_codes": [entry["vendor_id"], vendor["default_gl"], vendor["home_state"]],
             "t": t,
         }
         trace = await run_general(entry)
@@ -153,21 +162,30 @@ class DemoEngine:
         self.drawer = {
             "case_signature": signature,
             "general": {
-                "summary": (
-                    "Cloudspan normally maps to P-04 and GL-4021. The multi-period prepay "
-                    "changes treatment to capitalized software at GL-4890; current CA policy was resolved live."
-                ),
+                "summary": trace["reasoning_summary"],
                 "answer": result["answer"],
                 "cost": result["cost"],
                 "tokens": result["usage"]["total_tokens"],
             },
             "specialist": {
-                "summary": "Prepaid software -> P-04-CAPEX -> GL-4890. Live state code. Match.",
+                "summary": (
+                    f"{signature} -> {result['answer']['gl_code']}. "
+                    "Vendor and state context resolve live."
+                ),
                 "answer": first_validation["answer"] if first_validation else {},
                 "cost": first_validation["cost"] if first_validation else 0.0,
                 "tokens": first_validation["usage"]["total_tokens"] if first_validation else 0,
                 "validation": deepcopy(candidate["validation"]),
             },
+        }
+        self.recent_distillation = {
+            "specialist_id": candidate["specialist_id"],
+            "case_signature": signature,
+            "vendor": vendor["name"],
+            "context_codes": deepcopy(candidate["code_references"]),
+            "validation": deepcopy(candidate["validation"]),
+            "promoted": gate["passed"],
+            "version": self.library_version,
         }
         self.active_distillation = None
         return receipt
@@ -185,6 +203,9 @@ class DemoEngine:
         return {
             "entry_id": entry["entry_id"],
             "vendor": vendor,
+            "entry_type": entry["type"],
+            "amount": entry["amount"],
+            "raw_text": entry["raw_text"],
             "case_signature": signature,
             "route": route,
             "answer": deepcopy(result["answer"]),
@@ -220,6 +241,24 @@ class DemoEngine:
         self.refresh_version += 1
         return row
 
+    def update_specialist_context(self, specialist_id: str, code: str, action: str) -> dict[str, Any]:
+        lake.resolve(code)
+        spec = next(
+            (item for item in self.library.values() if item["specialist_id"] == specialist_id),
+            None,
+        )
+        if spec is None:
+            raise ValueError(f"Unknown specialist: {specialist_id}")
+        references = spec["code_references"]
+        if action == "attach" and code not in references:
+            references.append(code)
+        elif action == "detach" and code in references:
+            references.remove(code)
+        elif action not in {"attach", "detach"}:
+            raise ValueError("Action must be attach or detach")
+        self.library_version += 1
+        return deepcopy(spec)
+
     def state(self) -> dict[str, Any]:
         links = [
             {
@@ -237,6 +276,7 @@ class DemoEngine:
             "t": self.current_t,
             "queue_depth": self.queue_depth,
             "active_distillation": deepcopy(self.active_distillation),
+            "recent_distillation": deepcopy(self.recent_distillation),
             "receipts": deepcopy(self.receipts[-30:]),
             "cost_total": self.cost_total,
             "tokens_total": self.tokens_total,
