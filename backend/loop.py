@@ -237,6 +237,8 @@ class DemoEngine:
             "cost": result["cost"],
             "tokens": result["usage"]["total_tokens"],
             "usage": deepcopy(result["usage"]),
+            "model": result["model"],
+            "model_mode": result["mode"],
             "compute_ms": result["compute_ms"],
             "specialist_id": specialist_id,
             "matches_truth": result["answer"] == entry["_ground_truth"],
@@ -339,6 +341,7 @@ class DemoEngine:
         ]
         return {
             "mode": "mock" if config.MOCK_MODE else "real-with-fallback",
+            "models": deepcopy(config.MODELS),
             "poll_ms": config.POLL_MS,
             "running": self.running,
             "t": self.current_t,

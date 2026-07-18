@@ -11,11 +11,11 @@ def _env_bool(name: str, default: bool) -> bool:
 # Verify names/prices against OpenAI's pricing page the morning of the demo.
 # Prices are USD per 1,000,000 tokens.
 MODELS = {
-    "frontier": "gpt-5.6-terra",
+    "frontier": "gpt-5.6-sol",
     "cheap": "gpt-4.1-nano",
 }
 PRICE_TABLE = {
-    "gpt-5.6-terra": {"in": 2.50, "out": 15.00},
+    "gpt-5.6-sol": {"in": 5.00, "out": 30.00},
     "gpt-4.1-nano": {"in": 0.10, "out": 0.40},
 }
 

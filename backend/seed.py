@@ -182,6 +182,8 @@ def frozen_seed_receipts():
                     "cost": cost_from_usage(model, usage),
                     "tokens": usage["prompt_tokens"] + usage["completion_tokens"],
                     "usage": usage,
+                    "model": model,
+                    "model_mode": "seed",
                     "compute_ms": SEED_COMPUTE_MS[route],
                     "matches_truth": True,
                     "t": -float(120 - index),

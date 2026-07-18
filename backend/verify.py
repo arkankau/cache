@@ -14,9 +14,10 @@ async def verify() -> dict[str, bool]:
     engine = DemoEngine(time_scale=0.001)
     opening = engine.state()
 
-    assert 0.83 < opening["cost_total"] < 0.85
+    assert 1.67 < opening["cost_total"] < 1.69
     assert 141_000 < opening["tokens_total"] < 143_000
     assert opening["library_count"] == 6
+    assert opening["models"]["frontier"] == "gpt-5.6-sol"
 
     await engine.start()
     await engine.wait_until_complete()
@@ -73,6 +74,7 @@ async def verify() -> dict[str, bool]:
         "compiler_assert": hard_assert_fired,
         "reset_deterministic": reset_a == reset_b == opening,
         "costs_from_usage": all("usage" in item for item in live.values()),
+        "frontier_model_is_sol": opening["models"]["frontier"] == "gpt-5.6-sol",
     }
 
 
