@@ -42,10 +42,14 @@ class DemoEngine:
         self.tokens_total = sum(receipt["tokens"] for receipt in self.receipts)
         self.tasks_total = len(self.receipts)
         self.cost_points = []
+        self.token_points = []
         for index in range(19, len(self.receipts), 20):
             window = self.receipts[max(0, index - 19) : index + 1]
             self.cost_points.append(
                 {"task": index + 1, "value": sum(item["cost"] for item in window) / len(window)}
+            )
+            self.token_points.append(
+                {"task": index + 1, "value": sum(item["tokens"] for item in window) / len(window)}
             )
         self.running = False
         self.current_t = 0.0
@@ -225,10 +229,17 @@ class DemoEngine:
         self.cost_points.append(
             {"task": self.tasks_total, "value": self._rolling_cost()}
         )
+        self.token_points.append(
+            {"task": self.tasks_total, "value": self._rolling_tokens()}
+        )
 
     def _rolling_cost(self) -> float:
         window = self.receipts[-20:]
         return sum(receipt["cost"] for receipt in window) / len(window)
+
+    def _rolling_tokens(self) -> float:
+        window = self.receipts[-20:]
+        return sum(receipt["tokens"] for receipt in window) / len(window)
 
     def edit_lake_rate(self, code: str = "ST-CA-07", rate: float = 0.08) -> dict[str, Any]:
         row = lake.edit_state_rate(code, rate)
@@ -265,6 +276,11 @@ class DemoEngine:
                 "specialist_id": spec["specialist_id"],
                 "case_signature": signature,
                 "code_references": deepcopy(spec["code_references"]),
+                "retrieval_plan": deepcopy(spec["retrieval_plan"]),
+                "distilled_from": spec["distilled_from"],
+                "model_tier": spec["model_tier"],
+                "validation": deepcopy(spec["validation"]),
+                "generated": not str(spec["distilled_from"]).startswith("SEED-"),
                 "refreshed": spec["specialist_id"] in self.refreshed_specialists,
             }
             for signature, spec in self.library.items()
@@ -282,7 +298,9 @@ class DemoEngine:
             "tokens_total": self.tokens_total,
             "tasks_total": self.tasks_total,
             "cost_per_task": self._rolling_cost(),
+            "tokens_per_task": self._rolling_tokens(),
             "cost_points": deepcopy(self.cost_points[-32:]),
+            "token_points": deepcopy(self.token_points[-32:]),
             "library_count": len(self.library),
             "library_version": self.library_version,
             "specialist_links": links,

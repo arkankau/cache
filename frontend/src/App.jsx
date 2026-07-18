@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, RotateCcw } from "lucide-react";
 import AgentForge from "./components/AgentForge";
 import ContextLake from "./components/ContextLake";
-import InspectorDrawer from "./components/InspectorDrawer";
+import EfficiencyChart from "./components/EfficiencyChart";
 import LiveFeed from "./components/LiveFeed";
+import ReasoningDiff from "./components/ReasoningDiff";
 
 const INITIAL_POLL_MS = 500;
 const money = (value, digits = 4) => `$${Number(value || 0).toFixed(digits)}`;
@@ -11,8 +12,6 @@ const money = (value, digits = 4) => `$${Number(value || 0).toFixed(digits)}`;
 export default function App() {
   const [state, setState] = useState(null);
   const [libraryFlash, setLibraryFlash] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const previousLibraryVersion = useRef(0);
 
   const loadState = useCallback(async () => {
@@ -31,7 +30,6 @@ export default function App() {
     if (!state) return;
     if (state.library_version > previousLibraryVersion.current) {
       setLibraryFlash(true);
-      setCollapsed(false);
       window.setTimeout(() => setLibraryFlash(false), 700);
     }
     previousLibraryVersion.current = state.library_version;
@@ -47,8 +45,6 @@ export default function App() {
   };
 
   const reset = async () => {
-    setPinned(false);
-    setCollapsed(false);
     previousLibraryVersion.current = 0;
     await post("/reset");
   };
@@ -80,19 +76,23 @@ export default function App() {
         <div><span className="label">Payback</span><span className="metric">25-50x / repeat</span></div>
       </section>
 
-      <main className={`dashboard ${state.drawer && !collapsed ? "dashboard--with-drawer" : ""}`}>
+      <EfficiencyChart state={state} />
+
+      <main className="dashboard">
         <LiveFeed receipts={state.receipts} activeDistillation={state.active_distillation} />
-        <div className="visual-column">
-          <AgentForge state={state} />
+        <AgentForge state={state} />
+      </main>
+
+      <div className="lower-grid">
+        <ReasoningDiff drawer={state.drawer} />
+        <div className="lake-shell">
           <ContextLake
             state={state}
             onEdit={() => post("/lake/edit", { code: "ST-CA-07", rate: 0.08 })}
             onContextChange={(payload) => post("/library/context", payload)}
           />
         </div>
-      </main>
-
-      <InspectorDrawer drawer={state.drawer} pinned={pinned} onPin={() => setPinned((value) => !value)} collapsed={collapsed} onCollapse={() => setCollapsed((value) => !value)} />
+      </div>
     </div>
   );
 }
