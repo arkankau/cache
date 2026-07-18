@@ -28,6 +28,19 @@ def derive_signature(entry: dict[str, Any]) -> str:
     return f"{entry['type']}|{pattern}"
 
 
+SPECIALIST_DESCRIPTIONS = {
+    "invoice|P-04": "Posts routine software subscription invoices to GL-4021 and resolves the vendor's current state treatment.",
+    "invoice|P-11": "Classifies travel and entertainment invoices, preserving the meals-review control before posting.",
+    "expense|P-22": "Processes contractor service expenses with live nexus context and 1099-reportable treatment.",
+    "invoice|P-30": "Routes standard legal service invoices to GL-6410 using the vendor's current home-state policy.",
+    "notification|dupe": "Recognizes duplicate-invoice notifications and routes them to duplicate review without a full ledger investigation.",
+    "recon|multistate": "Handles multi-state reconciliations by resolving the linked state policies before creating a split review.",
+    "invoice|P-04-CAPEX": "Detects multi-period prepaid software contracts and capitalizes them to GL-4890 instead of routine subscription expense.",
+    "expense|P-22-RUSH": "Recognizes urgent contractor releases, retains contractor coding, and applies the expedited review procedure.",
+    "invoice|P-30-RETAINER": "Identifies prepaid legal retainers and applies the retainer-review procedure with live legal and state references.",
+}
+
+
 class DemoEngine:
     def __init__(self, time_scale: float | None = None):
         self.time_scale = config.DEMO_TIME_SCALE if time_scale is None else time_scale
@@ -281,6 +294,11 @@ class DemoEngine:
                 "model_tier": spec["model_tier"],
                 "validation": deepcopy(spec["validation"]),
                 "generated": not str(spec["distilled_from"]).startswith("SEED-"),
+                "description": SPECIALIST_DESCRIPTIONS.get(
+                    signature,
+                    "Executes the validated procedure for this exact ledger case signature.",
+                ),
+                "context_size": 70 + len(spec["code_references"]) * 18 + len(spec["retrieval_plan"]) * 12,
                 "refreshed": spec["specialist_id"] in self.refreshed_specialists,
             }
             for signature, spec in self.library.items()

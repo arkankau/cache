@@ -190,7 +190,7 @@ html,body,#root { height:auto; min-height:100%; overflow-x:hidden; overflow-y:au
 .app-shell { height:auto; min-height:100dvh; padding-bottom:28px; display:flex; flex-direction:column; gap:12px; }
 .topbar { min-height:58px; position:sticky; top:0; z-index:20; background:var(--bg); }
 .economics { min-height:58px; flex:none; }
-.dashboard { min-height:620px; grid-template-columns:minmax(0,1.02fr) minmax(520px,.98fr); }
+.dashboard { min-height:620px; grid-template-columns:minmax(420px,.82fr) minmax(620px,1.18fr); }
 .feed-card,.forge-card { height:620px; }
 .feed-card { grid-template-rows:78px 31px minmax(0,1fr); }
 .forge-card { padding:18px; grid-template-rows:auto 164px auto minmax(0,1fr); }
@@ -305,4 +305,109 @@ html,body,#root { height:auto; min-height:100%; overflow-x:hidden; overflow-y:au
   .lake-shell,.lake-shell .lake-card { min-height:530px; }
   .lake-shell .lake-workspace { grid-template-columns:minmax(0,1fr) 115px; }
   .lake-shell .lake-surface { min-height:420px; }
+}
+
+/* Unified agent ecosystem */
+.btn { text-decoration:none; }
+.btn--muted { color:var(--text-3); }
+.ecosystem-card { height:620px; padding:18px; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; overflow:hidden; }
+.ecosystem-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.ecosystem-search { width:230px; min-height:34px; padding:0 9px; display:flex; align-items:center; gap:7px; border:1px solid var(--border); border-radius:5px; color:var(--text-3); }
+.ecosystem-search input { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:10px; }
+.ecosystem-layout { min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 218px; gap:12px; }
+.ecosystem-canvas { min-height:0; position:relative; overflow:hidden; border:1px solid var(--border); border-radius:6px; background:var(--bg); }
+.ecosystem-canvas canvas { width:100%; height:100%; display:block; cursor:pointer; }
+.ecosystem-key { position:absolute; left:10px; bottom:8px; padding:4px 6px; border:1px solid var(--border); border-radius:4px; background:rgba(255,255,255,.92); color:var(--text-3); font-size:8px; text-transform:uppercase; letter-spacing:var(--track-label); pointer-events:none; }
+.ecosystem-key i { width:8px; height:8px; margin-right:4px; display:inline-block; border:1px solid var(--text-2); border-radius:50%; vertical-align:-1px; }
+.agent-profile { min-width:0; padding:16px; border:1px solid var(--border); border-radius:6px; display:flex; flex-direction:column; align-items:flex-start; }
+.profile-avatar { width:44px; height:44px; margin-bottom:15px; flex:none; display:grid; place-items:center; border:1px solid var(--accent-ink); border-radius:50%; background:var(--accent); }
+.profile-avatar--teacher { width:64px; height:64px; background:var(--inverted); color:var(--accent); }
+.agent-profile h3 { max-width:100%; margin:8px 0 10px; font-size:17px; font-weight:400; overflow-wrap:anywhere; }
+.profile-description { margin:0; color:var(--text-2); font-size:10px; line-height:1.55; }
+.profile-stat { width:100%; margin-top:18px; padding:9px 0; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border); border-bottom:1px solid var(--border); color:var(--text-2); font-size:9px; }
+.profile-stat strong { font-family:"Space Grotesk",var(--font); font-size:18px; font-weight:400; color:var(--text); }
+.profile-context { margin-top:12px; display:flex; flex-wrap:wrap; gap:4px; }
+.profile-context span { padding:4px 5px; border:1px solid var(--border); border-radius:3px; font-size:7px; }
+.profile-meta { margin:auto 0 0; color:var(--text-3); font-size:8px; line-height:1.5; }
+
+/* Per-entry reasoning table */
+.lower-grid { display:flex; flex-direction:column; gap:12px; }
+.reasoning-table-card { width:100%; min-height:510px; padding:18px; display:grid; grid-template-rows:auto minmax(0,1fr); gap:14px; overflow:hidden; }
+.table-section-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.table-caption { color:var(--text-3); font-size:9px; text-transform:uppercase; letter-spacing:var(--track-label); }
+.reasoning-table-scroll { min-height:0; overflow:auto; border:1px solid var(--border); border-radius:6px; }
+.reasoning-table { width:100%; min-width:1050px; border-collapse:collapse; table-layout:fixed; }
+.reasoning-table th { height:37px; padding:8px 10px; border-bottom:1px solid var(--border); border-right:1px solid var(--border); background:var(--bg); color:var(--text-2); font-size:8px; text-align:left; text-transform:uppercase; letter-spacing:var(--track-label); font-weight:400; }
+.reasoning-table th:nth-child(1) { width:18%; }
+.reasoning-table th:nth-child(2),.reasoning-table th:nth-child(3) { width:25%; }
+.reasoning-table th:nth-child(4) { width:18%; }
+.reasoning-table th:nth-child(5) { width:14%; }
+.reasoning-table th svg { margin-right:5px; vertical-align:-3px; }
+.reasoning-table td { height:92px; padding:10px; border-bottom:1px solid var(--border); border-right:1px solid var(--border); vertical-align:top; color:var(--text-2); font-size:9px; line-height:1.4; }
+.reasoning-table tr:last-child td { border-bottom:0; }
+.reasoning-table th:last-child,.reasoning-table td:last-child { border-right:0; }
+.reason-row--general { background:#FBFCFD; }
+.table-entry-title { display:block; margin-bottom:5px; color:var(--text); font-size:10px; }
+.reasoning-table td small { display:block; color:var(--text-3); font-size:8px; }
+.reasoning-table td p { margin:7px 0 0; }
+.path-status { display:inline-flex; padding:3px 5px; border:1px solid var(--border); border-radius:3px; color:var(--text-3); font-size:7px; text-transform:uppercase; letter-spacing:var(--track-label); }
+.path-status--active { background:var(--inverted); border-color:var(--inverted); color:var(--accent); }
+.path-status--specialist { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.table-context { display:flex; flex-wrap:wrap; gap:4px; }
+.table-context span { padding:3px 4px; border:1px solid var(--border); border-radius:3px; background:var(--surface); font-size:7px; }
+.usage-route { display:block; margin-bottom:7px; color:var(--text-3); font-size:7px; text-transform:uppercase; letter-spacing:var(--track-label); }
+.reasoning-table td strong { display:block; margin-bottom:4px; color:var(--text); font-weight:400; }
+.lake-shell,.lake-shell .lake-card { min-height:560px; }
+
+/* Generated finance report */
+.report-page { width:min(1180px,calc(100% - 36px)); min-height:100dvh; margin:0 auto; padding-bottom:34px; }
+.report-header { min-height:62px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+.report-back { display:flex; align-items:center; gap:7px; color:var(--text); text-decoration:none; text-transform:uppercase; font-size:15px; }
+.report-title { padding:42px 0 30px; display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+.report-title h1 { margin:8px 0 10px; font-family:"Space Grotesk",var(--font); font-size:46px; line-height:1.02; font-weight:400; }
+.report-title p:last-child { margin:0; color:var(--text-2); font-size:13px; }
+.report-status { padding:7px 9px; border:1px solid var(--border); border-radius:5px; display:flex; align-items:center; gap:6px; color:var(--text-3); font-size:10px; text-transform:uppercase; letter-spacing:var(--track-label); }
+.report-status--ready { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.report-metrics { display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+.report-metrics > div { min-height:92px; padding:18px; display:flex; flex-direction:column; gap:10px; border-right:1px solid var(--border); }
+.report-metrics > div:last-child { border-right:0; }
+.report-metrics strong { font-family:"Space Grotesk",var(--font); font-size:24px; font-weight:400; }
+.report-table-card { margin-top:28px; border:1px solid var(--border); border-radius:6px; overflow:hidden; background:var(--surface); }
+.report-section-title { min-height:58px; padding:0 16px; display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); }
+.report-section-title h2 { font-size:17px; font-weight:400; }
+.report-table { width:100%; border-collapse:collapse; }
+.report-table th,.report-table td { padding:12px 14px; border-bottom:1px solid var(--border); text-align:left; font-size:10px; font-weight:400; }
+.report-table th { color:var(--text-2); text-transform:uppercase; letter-spacing:var(--track-label); font-size:8px; }
+.report-table tr:last-child td { border-bottom:0; }
+.report-route { padding:4px 6px; border:1px solid var(--border); border-radius:3px; font-size:8px; text-transform:uppercase; letter-spacing:var(--track-label); }
+.report-route--specialist { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.empty-report { padding:20px; color:var(--text-3); }
+.report-footer { margin-top:18px; color:var(--text-3); font-size:9px; text-transform:uppercase; letter-spacing:var(--track-label); }
+
+@media (max-width:900px) {
+  .ecosystem-layout { grid-template-columns:minmax(0,1fr) 190px; }
+  .agent-profile { padding:12px; }
+  .report-metrics { grid-template-columns:repeat(3,1fr); }
+  .report-metrics > div:nth-child(3) { border-right:0; }
+  .report-metrics > div:nth-child(n+4) { border-top:1px solid var(--border); }
+}
+
+@media (max-width:700px) {
+  .ecosystem-card { height:780px; padding:12px; }
+  .ecosystem-heading { flex-direction:column; }
+  .ecosystem-search { width:100%; }
+  .ecosystem-layout { grid-template-columns:1fr; grid-template-rows:430px minmax(0,1fr); }
+  .agent-profile { min-height:250px; }
+  .profile-avatar--teacher { width:50px; height:50px; }
+  .table-section-heading { flex-direction:column; }
+  .reasoning-table-card { min-height:560px; padding:12px; }
+  .report-page { width:calc(100% - 18px); }
+  .report-title { padding:28px 0 22px; }
+  .report-title h1 { font-size:34px; }
+  .report-metrics { grid-template-columns:1fr 1fr; }
+  .report-metrics > div { border-top:1px solid var(--border); }
+  .report-metrics > div:nth-child(odd) { border-right:1px solid var(--border); }
+  .report-metrics > div:nth-child(even) { border-right:0; }
+  .report-table-card { overflow-x:auto; }
+  .report-table { min-width:820px; }
 }
