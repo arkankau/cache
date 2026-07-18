@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1240" font-family="Inter, 'Helvetica Neue', system-ui, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0D0D0D"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#0D0D0D"/>
+    </marker>
+    <style>
+      .card{fill:#FFFFFF;stroke:#E5E7EB;stroke-width:1.5;}
+      .lakebody{fill:#FFFFFF;stroke:#E5E7EB;stroke-width:1.5;}
+      .title{font-size:15px;fill:#0D0D0D;letter-spacing:.06em;font-weight:400;}
+      .sub{font-size:12px;fill:#4A5568;font-weight:400;}
+      .cost{font-size:12px;fill:#0D0D0D;font-weight:400;}
+      .lbl{font-size:11px;fill:#4A5568;letter-spacing:.09em;font-weight:400;}
+      .flow{fill:none;stroke:#0D0D0D;stroke-width:1.6;}
+      .ref{fill:none;stroke:#4A5568;stroke-width:1.4;stroke-dasharray:2 4;}
+      .loop{fill:none;stroke:#0D0D0D;stroke-width:1.6;stroke-dasharray:6 5;}
+      .actor{fill:none;stroke:#A0AEC0;stroke-width:1.4;stroke-dasharray:1 4;stroke-linecap:round;}
+      .h1{font-size:30px;fill:#0D0D0D;font-weight:400;letter-spacing:-.01em;}
+      .h2{font-size:15px;fill:#4A5568;font-weight:400;}
+      .chip{font-size:11px;fill:#0D0D0D;letter-spacing:.04em;}
+    </style>
+  </defs>
+
+  <!-- canvas -->
+  <rect x="0" y="0" width="1320" height="1240" fill="#F7FAFC"/>
+
+  <!-- header -->
+  <text x="40" y="56" class="h1">Cache — Production Architecture</text>
+  <text x="40" y="86" class="h2">Live Ramp card transactions → route → learn → sign-off. Expensive reasoning paid once per case-type, amortized forever.</text>
+
+  <!-- ============ STACK LEGEND (top-right, empty region) ============ -->
+  <rect class="card" x="980" y="150" width="300" height="232" rx="14"/>
+  <text x="1000" y="182" class="lbl">STACK</text>
+
+  <!-- Ramp mark -->
+  <g transform="translate(1000,198)">
+    <rect x="0" y="0" width="40" height="28" rx="7" fill="#CCFF00"/>
+    <text x="20" y="19" text-anchor="middle" font-size="13" fill="#0D0D0D" letter-spacing="-.02em">ramp</text>
+  </g>
+  <text x="1054" y="216" class="chip">Ramp — live transaction source</text>
+
+  <!-- FastAPI mark -->
+  <g transform="translate(1010,244)">
+    <circle cx="10" cy="10" r="19" fill="none" stroke="#05998b" stroke-width="3"/>
+    <path d="M12,1 L3,12 L10,12 L8,21 L17,9 L10,9 Z" fill="#05998b"/>
+  </g>
+  <text x="1054" y="262" class="chip">FastAPI — ingestion + routing API</text>
+
+  <!-- OpenAI mark -->
+  <g transform="translate(1020,292)">
+    <g fill="none" stroke="#0D0D0D" stroke-width="2">
+      <path d="M0,-16 C5,-16 8,-11 8,-5 C8,1 4,4 0,4 C-4,4 -8,1 -8,-5 C-8,-11 -5,-16 0,-16 Z"/>
+      <path d="M0,-16 C5,-16 8,-11 8,-5 C8,1 4,4 0,4 C-4,4 -8,1 -8,-5 C-8,-11 -5,-16 0,-16 Z" transform="rotate(60)"/>
+      <path d="M0,-16 C5,-16 8,-11 8,-5 C8,1 4,4 0,4 C-4,4 -8,1 -8,-5 C-8,-11 -5,-16 0,-16 Z" transform="rotate(120)"/>
+    </g>
+  </g>
+  <text x="1054" y="310" class="chip">OpenAI — GPT-5.6-terra · GPT-4.1-nano</text>
+
+  <!-- React mark -->
+  <g transform="translate(1020,346)">
+    <g fill="none" stroke="#0D0D0D" stroke-width="1.6">
+      <ellipse cx="0" cy="0" rx="18" ry="7"/>
+      <ellipse cx="0" cy="0" rx="18" ry="7" transform="rotate(60)"/>
+      <ellipse cx="0" cy="0" rx="18" ry="7" transform="rotate(120)"/>
+    </g>
+    <circle cx="0" cy="0" r="3" fill="#0D0D0D"/>
+  </g>
+  <text x="1054" y="352" class="chip">React — live dashboard</text>
+
+  <!-- ============ ROLE: CARDHOLDER ============ -->
+  <g transform="translate(360,178)">
+    <circle cx="30" cy="12" r="11" fill="none" stroke="#4A5568" stroke-width="2"/>
+    <path d="M10,50 C10,32 50,32 50,50" fill="none" stroke="#4A5568" stroke-width="2"/>
+    <rect x="18" y="40" width="24" height="15" rx="3" fill="#CCFF00" stroke="#4A5568" stroke-width="1.5"/>
+  </g>
+  <text x="390" y="252" text-anchor="middle" class="lbl">CARDHOLDER</text>
+  <text x="390" y="268" text-anchor="middle" class="sub" font-size="11">employee spend</text>
+  <path class="actor" d="M415,210 L458,210"/>
+
+  <!-- ============ NODES ============ -->
+
+  <!-- INPUT: Ramp card usage -->
+  <rect class="card" x="460" y="150" width="260" height="120" rx="14"/>
+  <g transform="translate(478,168)">
+    <rect x="0" y="0" width="40" height="28" rx="7" fill="#CCFF00"/>
+    <text x="20" y="19" text-anchor="middle" font-size="13" fill="#0D0D0D" letter-spacing="-.02em">ramp</text>
+  </g>
+  <text x="478" y="226" class="title">RAMP CARD USAGE</text>
+  <text x="478" y="246" class="sub">live transaction stream</text>
+  <text x="478" y="262" class="sub">{ vendor · amount · memo · date }</text>
+
+  <!-- INGEST -->
+  <rect class="card" x="470" y="330" width="240" height="110" rx="14"/>
+  <g transform="translate(486,352)">
+    <circle cx="9" cy="9" r="13" fill="none" stroke="#05998b" stroke-width="2.4"/>
+    <path d="M10,1 L2,11 L9,11 L7,18 L15,8 L9,8 Z" fill="#05998b"/>
+  </g>
+  <text x="486" y="392" class="title">INGESTION</text>
+  <text x="486" y="412" class="sub">normalize → canonical entry</text>
+  <text x="486" y="428" class="sub">assign vendor_id, extract memo</text>
+
+  <!-- ROUTER -->
+  <rect class="card" x="460" y="510" width="260" height="120" rx="14"/>
+  <text x="478" y="548" class="title">DETERMINISTIC ROUTER</text>
+  <text x="478" y="570" class="sub">signature = (type, recon_pattern)</text>
+  <text x="478" y="590" class="sub">known → specialist · novel → general</text>
+  <text x="478" y="612" class="lbl">EXACT MATCH · NO EMBEDDING</text>
+
+  <!-- SPECIALIST (cheap) -->
+  <rect class="card" x="200" y="690" width="250" height="130" rx="14"/>
+  <g transform="translate(216,710)">
+    <g fill="none" stroke="#0D0D0D" stroke-width="2">
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z"/>
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z" transform="rotate(60)"/>
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z" transform="rotate(120)"/>
+    </g>
+  </g>
+  <text x="216" y="732" class="title">SPECIALIST</text>
+  <text x="216" y="752" class="sub">compiled procedure · tight context</text>
+  <text x="216" y="770" class="sub">GPT-4.1-nano</text>
+  <rect x="216" y="784" width="112" height="22" rx="5" fill="#CCFF00"/>
+  <text x="272" y="799" text-anchor="middle" class="cost">≈ $0.002 / call</text>
+
+  <!-- LAKE (cylinder) -->
+  <g>
+    <path class="lakebody" d="M490,712 a110,18 0 0,0 220,0 v112 a110,18 0 0,1 -220,0 Z"/>
+    <ellipse cx="600" cy="712" rx="110" ry="18" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.5"/>
+  </g>
+  <text x="600" y="710" text-anchor="middle" class="title">SOURCE OF TRUTH LAKE</text>
+  <text x="600" y="754" text-anchor="middle" class="sub">GL codes · State codes · Vendor registry</text>
+  <text x="600" y="774" text-anchor="middle" class="sub">specialists store code refs,</text>
+  <text x="600" y="790" text-anchor="middle" class="sub">resolve() live — edit once, all current</text>
+
+  <!-- GENERAL (frontier) -->
+  <rect class="card" x="750" y="690" width="260" height="130" rx="14"/>
+  <g transform="translate(766,710)">
+    <g fill="none" stroke="#0D0D0D" stroke-width="2">
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z"/>
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z" transform="rotate(60)"/>
+      <path d="M0,-13 C4,-13 6,-9 6,-4 C6,1 3,3 0,3 C-3,3 -6,1 -6,-4 C-6,-9 -4,-13 0,-13 Z" transform="rotate(120)"/>
+    </g>
+  </g>
+  <text x="766" y="732" class="title">GENERAL AGENT</text>
+  <text x="766" y="752" class="sub">frontier · full context · tool-traced</text>
+  <text x="766" y="770" class="sub">GPT-5.6-terra</text>
+  <rect x="766" y="784" width="112" height="22" rx="5" fill="none" stroke="#E5E7EB" stroke-width="1.5"/>
+  <text x="822" y="799" text-anchor="middle" class="cost">≈ $0.05 / call</text>
+
+  <!-- COMPILER -->
+  <rect class="card" x="1050" y="690" width="210" height="130" rx="14"/>
+  <text x="1066" y="726" class="title">TRACE →</text>
+  <text x="1066" y="746" class="title">PROCEDURE</text>
+  <text x="1066" y="766" class="title">COMPILER</text>
+  <text x="1066" y="790" class="sub">retrieval plan + template</text>
+  <text x="1066" y="806" class="sub">+ code refs (no values)</text>
+
+  <!-- GATE -->
+  <rect class="card" x="1050" y="870" width="210" height="110" rx="14"/>
+  <text x="1066" y="908" class="title">VALIDATION GATE</text>
+  <text x="1066" y="930" class="sub">run candidate on 5 held-out</text>
+  <text x="1066" y="948" class="sub">promote only if 5 / 5 match</text>
+  <text x="1066" y="968" class="lbl">ELSE → KEEP GENERAL</text>
+
+  <!-- LIBRARY -->
+  <rect class="card" x="1050" y="1030" width="210" height="110" rx="14"/>
+  <text x="1066" y="1068" class="title">SPECIALIST LIBRARY</text>
+  <text x="1066" y="1090" class="sub">grows one entry per</text>
+  <text x="1066" y="1106" class="sub">new case-type solved</text>
+  <text x="1066" y="1128" class="lbl">THE ACCUMULATING ASSET</text>
+
+  <!-- RECEIPTS -->
+  <rect class="card" x="470" y="900" width="240" height="110" rx="14"/>
+  <text x="486" y="938" class="title">RECEIPTS</text>
+  <text x="486" y="960" class="sub">answer · per-field · cost · disposition</text>
+  <text x="486" y="982" class="cost">✓ <tspan fill="#4A5568">matches source of truth</tspan></text>
+  <path d="M488,977 l6,6 l10,-13" fill="none" stroke="#0D0D0D" stroke-width="2"/>
+
+  <!-- DASHBOARD -->
+  <rect class="card" x="470" y="1060" width="240" height="110" rx="14"/>
+  <g transform="translate(486,1082)">
+    <g fill="none" stroke="#0D0D0D" stroke-width="1.5">
+      <ellipse cx="9" cy="9" rx="15" ry="6"/>
+      <ellipse cx="9" cy="9" rx="15" ry="6" transform="rotate(60 9 9)"/>
+      <ellipse cx="9" cy="9" rx="15" ry="6" transform="rotate(120 9 9)"/>
+    </g>
+    <circle cx="9" cy="9" r="2.6" fill="#0D0D0D"/>
+  </g>
+  <text x="520" y="1094" class="title">DASHBOARD</text>
+  <text x="486" y="1124" class="sub">live feed · cost/task curve</text>
+  <text x="486" y="1140" class="sub">library growth · lake refresh</text>
+
+  <!-- ============ ROLE: CONTROLLER / CFO ============ -->
+  <g transform="translate(778,1064)">
+    <circle cx="30" cy="12" r="11" fill="none" stroke="#4A5568" stroke-width="2"/>
+    <path d="M10,50 C10,32 50,32 50,50" fill="none" stroke="#4A5568" stroke-width="2"/>
+    <path d="M22,44 l6,6 l12,-15" fill="none" stroke="#CCFF00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="808" y="1138" text-anchor="middle" class="lbl">CONTROLLER / CFO</text>
+  <text x="808" y="1154" text-anchor="middle" class="sub" font-size="11">reviews &amp; signs off</text>
+  <path class="actor" d="M712,1115 L775,1115"/>
+
+  <!-- ============ FLOW ARROWS (solid) ============ -->
+  <path class="flow" d="M590,270 L590,326" marker-end="url(#arrow)"/>
+  <path class="flow" d="M590,440 L590,506" marker-end="url(#arrow)"/>
+
+  <!-- router -> specialist -->
+  <path class="flow" d="M520,630 L360,686" marker-end="url(#arrow)"/>
+  <text x="392" y="668" class="lbl" text-anchor="end">KNOWN</text>
+  <!-- router -> general -->
+  <path class="flow" d="M662,630 L842,686" marker-end="url(#arrow)"/>
+  <text x="712" y="668" class="lbl">NOVEL</text>
+
+  <!-- specialist -> receipts -->
+  <path class="flow" d="M370,820 L522,896" marker-end="url(#arrow)"/>
+  <!-- general -> receipts -->
+  <path class="flow" d="M812,820 L660,896" marker-end="url(#arrow)"/>
+
+  <!-- receipts -> dashboard -->
+  <path class="flow" d="M590,1010 L590,1056" marker-end="url(#arrow)"/>
+
+  <!-- general -> compiler -->
+  <path class="flow" d="M1012,755 L1046,755" marker-end="url(#arrow)"/>
+  <!-- compiler -> gate -->
+  <path class="flow" d="M1155,820 L1155,866" marker-end="url(#arrow)"/>
+  <!-- gate -> library -->
+  <path class="flow" d="M1155,980 L1155,1026" marker-end="url(#arrow)"/>
+
+  <!-- ============ LAKE REFERENCE STUBS (dashed) ============ -->
+  <path class="ref" d="M452,762 L488,762"/>
+  <path class="ref" d="M712,762 L748,762"/>
+  <text x="470" y="700" class="lbl">resolve()</text>
+  <text x="700" y="700" class="lbl" text-anchor="end">resolve()</text>
+
+  <!-- ============ FEEDBACK LOOP (dashed) library -> router ============ -->
+  <path class="loop" d="M1262,1085 L1294,1085 L1294,570 L722,570" marker-end="url(#arrow)"/>
+  <text x="1286" y="470" class="lbl" text-anchor="end">DISTILLED SPECIALIST ADDED →</text>
+  <text x="1286" y="486" class="lbl" text-anchor="end">FUTURE REPEATS ROUTE CHEAP</text>
+
+  <!-- footer caption -->
+  <text x="40" y="1214" class="sub">Production input is the live Ramp card feed. The hackathon demo substitutes seeded synthetic entries in its place — every downstream stage (routing, compile, gate, lake, receipts) is identical. Stylized brand marks; not affiliated with the vendors shown.</text>
+</svg>
