@@ -50,19 +50,22 @@ class DemoEngine:
     def _load_seed(self) -> None:
         lake.reset()
         self.library = deepcopy(INITIAL_LIBRARY)
+        for spec in self.library.values():
+            spec["review_status"] = "validated"
+        self.defect_agents = []
         self.receipts = frozen_seed_receipts()
         self.cost_total = sum(receipt["cost"] for receipt in self.receipts)
         self.tokens_total = sum(receipt["tokens"] for receipt in self.receipts)
         self.tasks_total = len(self.receipts)
         self.cost_points = []
-        self.token_points = []
+        self.compute_points = []
         for index in range(19, len(self.receipts), 20):
             window = self.receipts[max(0, index - 19) : index + 1]
             self.cost_points.append(
                 {"task": index + 1, "value": sum(item["cost"] for item in window) / len(window)}
             )
-            self.token_points.append(
-                {"task": index + 1, "value": sum(item["tokens"] for item in window) / len(window)}
+            self.compute_points.append(
+                {"task": index + 1, "value": sum(item["compute_ms"] for item in window) / len(window)}
             )
         self.running = False
         self.current_t = 0.0
@@ -144,7 +147,8 @@ class DemoEngine:
             run = await run_specialist(spec, entry)
             result = run["result"]
             receipt = self._receipt(
-                entry, vendor["name"], signature, "specialist", result, t, run["resolved_codes"]
+                entry, vendor["name"], signature, "specialist", result, t, run["resolved_codes"],
+                spec["specialist_id"],
             )
             self._record_receipt(receipt)
             return receipt
@@ -167,13 +171,14 @@ class DemoEngine:
         self.cost_total += gate["cost"]
         self.tokens_total += gate["tokens"]
         if gate["passed"]:
+            candidate["review_status"] = "pending_review"
             self.library[signature] = candidate
             self.library_version += 1
         else:
             self.no_compress.append(signature)
 
         result = trace["result"]
-        receipt = self._receipt(entry, vendor["name"], signature, "general", result, t, {})
+        receipt = self._receipt(entry, vendor["name"], signature, "general", result, t, {}, None)
         self._record_receipt(receipt)
         first_validation = gate["runs"][0]["result"] if gate["runs"] else None
         self.drawer = {
@@ -183,6 +188,7 @@ class DemoEngine:
                 "answer": result["answer"],
                 "cost": result["cost"],
                 "tokens": result["usage"]["total_tokens"],
+                "compute_ms": result["compute_ms"],
             },
             "specialist": {
                 "summary": (
@@ -192,6 +198,7 @@ class DemoEngine:
                 "answer": first_validation["answer"] if first_validation else {},
                 "cost": first_validation["cost"] if first_validation else 0.0,
                 "tokens": first_validation["usage"]["total_tokens"] if first_validation else 0,
+                "compute_ms": first_validation["compute_ms"] if first_validation else 0.0,
                 "validation": deepcopy(candidate["validation"]),
             },
         }
@@ -216,6 +223,7 @@ class DemoEngine:
         result: dict[str, Any],
         t: float,
         resolved_codes: dict[str, Any],
+        specialist_id: str | None,
     ) -> dict[str, Any]:
         return {
             "entry_id": entry["entry_id"],
@@ -229,6 +237,8 @@ class DemoEngine:
             "cost": result["cost"],
             "tokens": result["usage"]["total_tokens"],
             "usage": deepcopy(result["usage"]),
+            "compute_ms": result["compute_ms"],
+            "specialist_id": specialist_id,
             "matches_truth": result["answer"] == entry["_ground_truth"],
             "resolved_codes": deepcopy(resolved_codes),
             "t": t,
@@ -242,17 +252,40 @@ class DemoEngine:
         self.cost_points.append(
             {"task": self.tasks_total, "value": self._rolling_cost()}
         )
-        self.token_points.append(
-            {"task": self.tasks_total, "value": self._rolling_tokens()}
+        self.compute_points.append(
+            {"task": self.tasks_total, "value": self._rolling_compute_ms()}
         )
 
     def _rolling_cost(self) -> float:
         window = self.receipts[-20:]
         return sum(receipt["cost"] for receipt in window) / len(window)
 
-    def _rolling_tokens(self) -> float:
+    def _rolling_compute_ms(self) -> float:
         window = self.receipts[-20:]
-        return sum(receipt["tokens"] for receipt in window) / len(window)
+        return sum(receipt["compute_ms"] for receipt in window) / len(window)
+
+    def review_agent(self, specialist_id: str, decision: str) -> dict[str, Any]:
+        item = next(
+            ((signature, spec) for signature, spec in self.library.items() if spec["specialist_id"] == specialist_id),
+            None,
+        )
+        if item is None:
+            raise ValueError(f"Unknown specialist: {specialist_id}")
+        signature, spec = item
+        if str(spec["distilled_from"]).startswith("SEED-"):
+            raise ValueError("Seed specialists are already validated")
+        if decision == "approve":
+            spec["review_status"] = "validated"
+            reviewed = deepcopy(spec)
+        elif decision == "reject":
+            reviewed = deepcopy(spec)
+            reviewed["review_status"] = "defect"
+            self.defect_agents.append(reviewed)
+            del self.library[signature]
+        else:
+            raise ValueError("Decision must be approve or reject")
+        self.library_version += 1
+        return reviewed
 
     def edit_lake_rate(self, code: str = "ST-CA-07", rate: float = 0.08) -> dict[str, Any]:
         row = lake.edit_state_rate(code, rate)
@@ -299,6 +332,7 @@ class DemoEngine:
                     "Executes the validated procedure for this exact ledger case signature.",
                 ),
                 "context_size": 70 + len(spec["code_references"]) * 18 + len(spec["retrieval_plan"]) * 12,
+                "review_status": spec.get("review_status", "validated"),
                 "refreshed": spec["specialist_id"] in self.refreshed_specialists,
             }
             for signature, spec in self.library.items()
@@ -316,12 +350,28 @@ class DemoEngine:
             "tokens_total": self.tokens_total,
             "tasks_total": self.tasks_total,
             "cost_per_task": self._rolling_cost(),
-            "tokens_per_task": self._rolling_tokens(),
+            "compute_time_per_task": self._rolling_compute_ms(),
             "cost_points": deepcopy(self.cost_points[-32:]),
-            "token_points": deepcopy(self.token_points[-32:]),
+            "compute_points": deepcopy(self.compute_points[-32:]),
             "library_count": len(self.library),
             "library_version": self.library_version,
             "specialist_links": links,
+            "defect_agents": [
+                {
+                    "specialist_id": spec["specialist_id"],
+                    "case_signature": spec["case_signature"],
+                    "review_status": "defect",
+                    "description": SPECIALIST_DESCRIPTIONS.get(spec["case_signature"], "Defective specialist"),
+                    "code_references": deepcopy(spec["code_references"]),
+                    "retrieval_plan": deepcopy(spec["retrieval_plan"]),
+                    "distilled_from": spec["distilled_from"],
+                    "model_tier": spec["model_tier"],
+                    "validation": deepcopy(spec["validation"]),
+                    "generated": True,
+                    "context_size": 70 + len(spec["code_references"]) * 18 + len(spec["retrieval_plan"]) * 12,
+                }
+                for spec in self.defect_agents
+            ],
             "no_compress": deepcopy(self.no_compress),
             "drawer": deepcopy(self.drawer),
             "lake": lake.snapshot(),

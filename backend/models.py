@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from copy import deepcopy
+from time import perf_counter
 from typing import Any
 
 from . import config
@@ -93,11 +94,16 @@ async def call_model(
     prompt: str,
     schema: dict[str, str],
 ) -> dict[str, Any]:
+    started = perf_counter()
     if config.MOCK_MODE:
-        return await _mock_call(tier, entry)
+        result = await _mock_call(tier, entry)
+        result["compute_ms"] = round((perf_counter() - started) * 1000, 1)
+        return result
 
     try:
-        return await _real_call(tier, entry, prompt, schema)
+        result = await _real_call(tier, entry, prompt, schema)
     except Exception as exc:
         logger.exception("Model call failed; continuing with mock fallback: %s", exc)
-        return await _mock_call(tier, entry, mode="mock-fallback")
+        result = await _mock_call(tier, entry, mode="mock-fallback")
+    result["compute_ms"] = round((perf_counter() - started) * 1000, 1)
+    return result

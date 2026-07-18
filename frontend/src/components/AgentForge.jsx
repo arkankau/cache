@@ -24,7 +24,7 @@ export default function AgentForge({ state }) {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(state.recent_distillation?.specialist_id || "teacher");
   const specialists = state.specialist_links;
-  dataRef.current = { specialists, active: state.active_distillation, recent: state.recent_distillation, query, selectedId };
+  dataRef.current = { specialists, defects: state.defect_agents, active: state.active_distillation, recent: state.recent_distillation, query, selectedId };
 
   useEffect(() => {
     if (state.recent_distillation?.promoted) setSelectedId(state.recent_distillation.specialist_id);
@@ -36,7 +36,11 @@ export default function AgentForge({ state }) {
     if (!nodes.has("teacher")) nodes.set("teacher", { id: "teacher", x: width * .35, y: height * .5, vx: .28, vy: .21, r: radiusFor(TEACHER.context_size), data: TEACHER });
     const teacher = nodes.get("teacher");
     const currentIds = new Set(["teacher", ...specialists.map((spec) => spec.specialist_id)]);
-    for (const [id] of nodes) if (!currentIds.has(id)) nodes.delete(id);
+    const defects = new Map(state.defect_agents.map((agent) => [agent.specialist_id, agent]));
+    for (const [id, node] of nodes) if (!currentIds.has(id)) {
+      if (defects.has(id) && !node.defectAt) { node.defectAt = performance.now(); node.data = defects.get(id); }
+      else if (!defects.has(id) && !node.defectAt) nodes.delete(id);
+    }
     specialists.forEach((spec, index) => {
       const existing = nodes.get(spec.specialist_id);
       if (existing) { existing.data = spec; existing.r = radiusFor(spec.context_size); return; }
@@ -47,14 +51,14 @@ export default function AgentForge({ state }) {
         id: spec.specialist_id,
         x: generated ? teacher.x + Math.cos(angle) * 8 : width * (.18 + ((seed % 61) / 100)),
         y: generated ? teacher.y + Math.sin(angle) * 8 : height * (.18 + (((seed >> 5) % 63) / 100)),
-        vx: generated ? Math.cos(angle) * 2.4 : ((seed % 17) - 8) / 25,
-        vy: generated ? Math.sin(angle) * 2.4 : (((seed >> 4) % 17) - 8) / 25,
+        vx: generated ? Math.cos(angle) * .48 : ((seed % 17) - 8) / 70,
+        vy: generated ? Math.sin(angle) * .48 : (((seed >> 4) % 17) - 8) / 70,
         r: radiusFor(spec.context_size),
         data: spec,
         bornAt: performance.now()
       });
     });
-  }, [specialists]);
+  }, [specialists, state.defect_agents]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,7 +85,8 @@ export default function AgentForge({ state }) {
       const nodes = [...nodesRef.current.values()];
       if (!reducedMotion) {
         for (const node of nodes) {
-          const speed = node.id === "teacher" ? .55 : .95;
+          if (node.defectAt) continue;
+          const speed = node.id === "teacher" ? .12 : .18;
           node.x += node.vx * speed;
           node.y += node.vy * speed;
           if (node.x - node.r < 5) { node.x = node.r + 5; node.vx = Math.abs(node.vx); }
@@ -103,6 +108,7 @@ export default function AgentForge({ state }) {
             b.y += ny * overlap * (a.r * a.r / totalMass);
             const impulse = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
             if (impulse < 0) { a.vx += impulse * nx; a.vy += impulse * ny; b.vx -= impulse * nx; b.vy -= impulse * ny; }
+            for (const node of [a,b]) { const speed = Math.max(.01,Math.hypot(node.vx,node.vy)); const cap = node.id === "teacher" ? .24 : .55; if (speed > cap) { node.vx = node.vx / speed * cap; node.vy = node.vy / speed * cap; } }
           }
         }
       }
@@ -115,7 +121,37 @@ export default function AgentForge({ state }) {
       for (let x = 24; x < width; x += 48) for (let y = 24; y < height; y += 48) { ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.stroke(); }
 
       const current = dataRef.current;
+      let forming = null;
+      if (current.active) {
+        const teacher = nodesRef.current.get("teacher");
+        if (teacher) {
+          const angle = -.42;
+          const distance = teacher.r + 112;
+          const x = Math.min(width - 30, teacher.x + Math.cos(angle) * distance);
+          const y = Math.max(30, teacher.y + Math.sin(angle) * distance);
+          forming = {x,y,r:22};
+          ctx.beginPath(); ctx.moveTo(teacher.x,teacher.y); ctx.lineTo(x,y);
+          ctx.strokeStyle = "#1A1919"; ctx.lineWidth = 1.5; ctx.stroke();
+          (current.active.context_codes || []).slice(0,4).forEach((code,index) => {
+            const phase = ((now / 1900) + index * .24) % 1;
+            const px = teacher.x + (x - teacher.x) * phase;
+            const py = teacher.y + (y - teacher.y) * phase;
+            ctx.fillStyle = "#FFFFFF"; ctx.strokeStyle = "#4A5568"; ctx.lineWidth = 1;
+            ctx.fillRect(px - 27,py - 8,54,16); ctx.strokeRect(px - 27,py - 8,54,16);
+            ctx.fillStyle = "#0D0D0D"; ctx.font = "7px Inter"; ctx.textAlign = "center"; ctx.fillText(code,px,py + 2);
+          });
+        }
+      }
       for (const node of nodes) {
+        if (node.defectAt) {
+          const age = now - node.defectAt;
+          if (age > 1200) { nodesRef.current.delete(node.id); continue; }
+          const progress = age / 1200;
+          ctx.save(); ctx.globalAlpha = 1 - progress;
+          for (let shard=0; shard<10; shard+=1) { const angle = shard / 10 * Math.PI * 2; const distance = progress * 58; const sx=node.x+Math.cos(angle)*distance, sy=node.y+Math.sin(angle)*distance; ctx.beginPath(); ctx.arc(sx,sy,Math.max(1,5*(1-progress)),0,Math.PI*2); ctx.fillStyle=shard%2?"#1A1919":"#CCFF00"; ctx.fill(); }
+          ctx.restore();
+          continue;
+        }
         const isTeacher = node.id === "teacher";
         const searchable = `${node.data.case_signature} ${node.data.description || ""} ${(node.data.code_references || []).join(" ")}`.toLowerCase();
         const dimmed = current.query && !searchable.includes(current.query.toLowerCase());
@@ -140,18 +176,11 @@ export default function AgentForge({ state }) {
         ctx.restore();
       }
 
-      if (current.active) {
-        const teacher = nodesRef.current.get("teacher");
-        if (teacher) {
-          const phase = (now % 1500) / 1500;
-          const angle = -.48;
-          const distance = phase * (teacher.r + 48);
-          const x = teacher.x + Math.cos(angle) * distance;
-          const y = teacher.y + Math.sin(angle) * distance;
-          ctx.beginPath(); ctx.arc(x, y, 8 + phase * 18, 0, Math.PI * 2);
-          ctx.fillStyle = "#CCFF00"; ctx.fill(); ctx.strokeStyle = "#1A1919"; ctx.stroke();
-          ctx.fillStyle = "#0D0D0D"; ctx.font = "7px Inter"; ctx.textAlign = "center"; ctx.fillText("NEW", x, y + 2);
-        }
+      if (forming) {
+        const pulse = 1 + Math.sin(now / 130) * .08;
+        ctx.beginPath(); ctx.arc(forming.x,forming.y,forming.r*pulse,0,Math.PI*2);
+        ctx.fillStyle="#CCFF00"; ctx.fill(); ctx.strokeStyle="#1A1919"; ctx.lineWidth=1.5; ctx.stroke();
+        ctx.fillStyle="#0D0D0D"; ctx.font="8px Inter"; ctx.textAlign="center"; ctx.fillText("NEW AGENT",forming.x,forming.y+2);
       }
       frame = requestAnimationFrame(tick);
     };
@@ -174,12 +203,12 @@ export default function AgentForge({ state }) {
         <div className="ecosystem-canvas"><canvas ref={canvasRef} onClick={chooseAgent} aria-label="Moving frontier teacher and specialist agents" /><span className="ecosystem-key"><i /> circle size = context footprint</span></div>
         <aside className="agent-profile">
           <span className={selectedId === "teacher" ? "profile-avatar profile-avatar--teacher" : "profile-avatar"}>{selectedId === "teacher" ? <GraduationCap size={24} /> : <Bot size={22} />}</span>
-          <p className="label">{selectedId === "teacher" ? "Frontier model" : selected.generated ? "Newly generated specialist" : "Validated specialist"}</p>
+          <p className="label">{selectedId === "teacher" ? "Frontier model" : selected.review_status === "pending_review" ? "Pending reviewer audit" : selected.generated ? "Validated generated specialist" : "Validated specialist"}</p>
           <h3>{selected.case_signature}</h3>
           <p className="profile-description">{selected.description}</p>
           <div className="profile-stat"><span>Context footprint</span><strong className="mono">{selected.context_size}</strong></div>
           {selected.code_references ? <div className="profile-context">{selected.code_references.map((code) => <span key={code}>{code}</span>)}</div> : null}
-          {selected.validation ? <p className="profile-meta mono">{selected.validation.held_out_matches}/{selected.validation.held_out_total} gate / distilled from {selected.distilled_from}</p> : <p className="profile-meta">Broad context / expensive reasoning / teacher trace</p>}
+          {selected.validation ? <p className="profile-meta mono">{selected.validation.held_out_matches}/{selected.validation.held_out_total} gate / {selected.review_status.replace("_"," ")} / distilled from {selected.distilled_from}</p> : <p className="profile-meta">Broad context / expensive reasoning / teacher trace</p>}
         </aside>
       </div>
     </section>

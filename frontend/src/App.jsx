@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalLink, Play, RotateCcw } from "lucide-react";
+import AgentAudit from "./components/AgentAudit";
 import AgentForge from "./components/AgentForge";
 import ContextLake from "./components/ContextLake";
 import EfficiencyChart from "./components/EfficiencyChart";
 import FinancialReport from "./components/FinancialReport";
 import LiveFeed from "./components/LiveFeed";
-import ReasoningTable from "./components/ReasoningTable";
+import ReasoningDiff from "./components/ReasoningDiff";
 
 const INITIAL_POLL_MS = 500;
 const money = (value, digits = 4) => `$${Number(value || 0).toFixed(digits)}`;
@@ -108,8 +109,10 @@ export default function App() {
         <AgentForge state={state} />
       </main>
 
+      <AgentAudit state={state} onReview={(payload) => post("/library/review", payload)} />
+
       <div className="lower-grid">
-        <ReasoningTable receipts={state.receipts} active={state.active_distillation} drawer={state.drawer} />
+        <ReasoningDiff drawer={state.drawer} />
         <div className="lake-shell">
           <ContextLake
             state={state}

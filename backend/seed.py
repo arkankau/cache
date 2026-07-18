@@ -149,6 +149,7 @@ SEED_USAGE = {
     "general": {"prompt_tokens": 1093, "completion_tokens": 440},
     "specialist": {"prompt_tokens": 110, "completion_tokens": 15},
 }
+SEED_COMPUTE_MS = {"general": 1240.0, "specialist": 205.0}
 
 SEED_SUBMISSIONS = {
     "invoice|P-04": ("invoice", 249.00, "Monthly software subscription invoice"),
@@ -181,6 +182,7 @@ def frozen_seed_receipts():
                     "cost": cost_from_usage(model, usage),
                     "tokens": usage["prompt_tokens"] + usage["completion_tokens"],
                     "usage": usage,
+                    "compute_ms": SEED_COMPUTE_MS[route],
                     "matches_truth": True,
                     "t": -float(120 - index),
                 }

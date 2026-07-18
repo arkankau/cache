@@ -28,6 +28,11 @@ class ContextEdit(BaseModel):
     action: str
 
 
+class ReviewEdit(BaseModel):
+    specialist_id: str
+    decision: str
+
+
 @app.get("/health")
 async def health():
     return {"ok": True}
@@ -59,4 +64,10 @@ async def edit_lake(edit: LakeEdit):
 @app.post("/library/context")
 async def edit_specialist_context(edit: ContextEdit):
     specialist = engine.update_specialist_context(edit.specialist_id, edit.code, edit.action)
+    return {"specialist": specialist, "state": engine.state()}
+
+
+@app.post("/library/review")
+async def review_specialist(edit: ReviewEdit):
+    specialist = engine.review_agent(edit.specialist_id, edit.decision)
     return {"specialist": specialist, "state": engine.state()}
